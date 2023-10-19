@@ -1,4 +1,5 @@
 ﻿using XnetDsa.Impls;
+using HAN = System.Security.Cryptography.HashAlgorithmName;
 
 namespace XnetDsa
 {
@@ -12,6 +13,24 @@ namespace XnetDsa
         private static readonly DsaAlgorithm[] BUILTINS = new DsaAlgorithm[]
         {
             new SECP256K1(),
+
+            // --> RSA with SHA256
+            new RSA(1024, HAN.SHA256),
+            new RSA(2048, HAN.SHA256),
+            new RSA(3072, HAN.SHA256),
+            new RSA(4096, HAN.SHA256),
+            
+            // --> RSA with SHA384
+            new RSA(1024, HAN.SHA384),
+            new RSA(2048, HAN.SHA384),
+            new RSA(3072, HAN.SHA384),
+            new RSA(4096, HAN.SHA384),
+            
+            // --> RSA with SHA512
+            new RSA(1024, HAN.SHA512),
+            new RSA(2048, HAN.SHA512),
+            new RSA(3072, HAN.SHA512),
+            new RSA(4096, HAN.SHA512),
         };
 
         // --

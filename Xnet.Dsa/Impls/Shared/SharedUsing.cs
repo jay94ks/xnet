@@ -28,6 +28,8 @@ namespace XnetDsa.Impls.Shared
         static SharedUsing()
         {
             SharedSha256.SetCtor(() => SHA256.Create());
+            SharedSha384.SetCtor(() => SHA384.Create());
+            SharedSha512.SetCtor(() => SHA512.Create());
             SharedSecp256k1.SetCtor(() => new Secp256k1());
         }
 

@@ -6,6 +6,26 @@ namespace XnetDsa.Test
     {
         static void Main(string[] args)
         {
+            RunAlgorithmTest();
+            Console.WriteLine(" ---- ");
+
+            DsaAlgorithm.Default = DsaAlgorithm.GetAlgorithm("rsa2048");
+            RunAlgorithmTest();
+            Console.WriteLine(" ---- ");
+
+            DsaAlgorithm.Default = DsaAlgorithm.GetAlgorithm("rsa2048-sha384");
+            RunAlgorithmTest();
+            Console.WriteLine(" ---- ");
+
+            DsaAlgorithm.Default = DsaAlgorithm.GetAlgorithm("rsa2048-sha512");
+            RunAlgorithmTest();
+
+        }
+
+        private static void RunAlgorithmTest()
+        {
+            Console.WriteLine($"Algorithm: {DsaAlgorithm.Default.Name}.");
+
             var Text = Encoding.UTF8.GetBytes("Hello World");
             var Digest = DsaDigest.Make(Text);
 
