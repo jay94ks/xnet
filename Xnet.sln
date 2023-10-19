@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet", "Xnet\Xnet.csproj", "{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Test", "Xnet.Test\Xnet.Test.csproj", "{709A43EB-C216-46BD-8CE9-4238C8C34559}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1E39FBE2-9FD2-4452-BB5F-12471CA2E395}
+	EndGlobalSection
+EndGlobal
