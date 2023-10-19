@@ -20,8 +20,14 @@ namespace XnetInternals.Sockets
         /// <param name="Authenticator"></param>
         public SocketTcpSsl(Socket Socket, Func<SslStream, Task> Authenticator)
         {
-            var Network = new NetworkStream(Socket, true);
+            try
+            {
+                Socket.NoDelay = true;
+                Socket.Blocking = false;
+            }
+            catch { }
 
+            var Network = new NetworkStream(Socket, true);
             m_Authenticator = Authenticator;
             m_Authentication = new TaskCompletionSource();
             m_Stream = new SslStream(Network, false);

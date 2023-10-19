@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using XnetInternals.Impls;
-using XnetInternals.Impls.Protocols;
 using XnetInternals.Sockets;
 
 /// <summary>
