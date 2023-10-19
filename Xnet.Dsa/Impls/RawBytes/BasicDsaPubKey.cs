@@ -29,7 +29,7 @@ namespace XnetDsa.Impls.RawBytes
 
         /// <inheritdoc/>
         public override bool Validity
-            => Validity && Algorithm != null
+            => base.Validity && Algorithm != null
             && Algorithm.SizeOfPubKey == Length;
     }
 }

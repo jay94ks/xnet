@@ -1,4 +1,7 @@
-﻿namespace XnetDsa.Impls.Shared
+﻿using Secp256k1Net;
+using System.Security.Cryptography;
+
+namespace XnetDsa.Impls.Shared
 {
     internal class SharedUsing
     {
@@ -17,7 +20,15 @@
 
                 return SHARED.Value;
             }
+        }
 
+        /// <summary>
+        /// Configure correct constructors for sharedusing objects.
+        /// </summary>
+        static SharedUsing()
+        {
+            SharedSha256.SetCtor(() => SHA256.Create());
+            SharedSecp256k1.SetCtor(() => new Secp256k1());
         }
 
         /// <summary>

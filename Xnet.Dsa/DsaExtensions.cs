@@ -72,6 +72,9 @@ namespace XnetDsa
             if (RawBytes.Length > 0 && RawBytes[RawBytes.Length - 1] is null)
                 throw new ArgumentException("null argument specified.");
 
+            if (RawBytes.Length > 1)
+                Counter++;
+
             if (Counter == RawBytes.Length)
                 return;
 

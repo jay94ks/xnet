@@ -141,7 +141,7 @@ namespace XnetDsa.Impls
             }
 
             Span<byte> PubKey = stackalloc byte[SizeOfPubKey];
-            if (Secp.PublicKeySerialize(PubKey, RawKey, Flags.SECP256K1_EC_COMPRESSED) == false)
+            if (Secp.PublicKeySerialize(PubKey, RawPub, Flags.SECP256K1_EC_COMPRESSED) == false)
             {
                 ThrowCorrupted();
                 return null;
@@ -225,10 +225,10 @@ namespace XnetDsa.Impls
                 Span<byte> RawDig = stackalloc byte[SizeOfDigest];
                 Digest.CopyTo(RawDig);
 
-                Span<byte> Sign = stackalloc byte[SizeOfSign];
-                Sign.CopyTo(Sign);
+                Span<byte> RawSig = stackalloc byte[SizeOfSign];
+                Sign.CopyTo(RawSig);
 
-                return Secp.Verify(Sign, RawDig, RawPub);
+                return Secp.Verify(RawSig, RawDig, RawPub);
             });
         }
 
