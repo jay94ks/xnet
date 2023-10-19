@@ -6,8 +6,6 @@ namespace XnetDsa
     /// <summary>
     /// Base class for secure packet 
     /// that protected by digital signing algorithm.
-    /// Note that, packets which derived from this can be passed to other connection
-    /// by broadcast or emitting to other once.
     /// </summary>
     public abstract class DsaSecuredPacket : Xnet.BasicPacket
     {

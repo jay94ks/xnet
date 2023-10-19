@@ -8,7 +8,7 @@ namespace XnetDsa
     public static class DsaExtensions
     {
         /// <summary>
-        /// Enable the DSA key pair. and if <paramref name="WithLayer"/> is true, the DSA layer for Xnet will be enabled.
+        /// Enable the DSA key pair and <see cref="DsaSecuredPacket"/> support.
         /// </summary>
         /// <typeparam name="TOptions"></typeparam>
         /// <param name="Options"></param>
@@ -16,7 +16,7 @@ namespace XnetDsa
         /// <param name="PubKey"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static TOptions EnableDsaPacket<TOptions>(this TOptions Options, bool WithLayer, DsaKey Key, DsaPubKey PubKey = default) where TOptions : Xnet.Options
+        public static TOptions EnableDsaSecuredPackets<TOptions>(this TOptions Options, DsaKey Key, DsaPubKey PubKey = default) where TOptions : Xnet.Options
         {
             if (Key.Validity == false)
                 throw new ArgumentException("the specified key is invalid.");
@@ -32,23 +32,11 @@ namespace XnetDsa
             Options.Extenders.Add(new DsaExtender()
             {
                 Key = Key, 
-                PubKey = PubKey,
-                WithLayer = WithLayer
+                PubKey = PubKey
             });
 
             return Options;
         }
-
-        /// <summary>
-        /// Enable the DSA key pair without DSA layer.
-        /// </summary>
-        /// <typeparam name="TOptions"></typeparam>
-        /// <param name="Options"></param>
-        /// <param name="Key"></param>
-        /// <param name="PubKey"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static TOptions EnableDsaPacket<TOptions>(this TOptions Options, DsaKey Key, DsaPubKey PubKey = default) where TOptions : Xnet.Options => Options.EnableDsaPacket(false, Key, PubKey);
 
         /// <summary>
         /// Throw an exception if algorithm of specified objects are not same.
