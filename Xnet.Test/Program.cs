@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using XnetDsa;
 
 namespace XnetTests.Test
 {
@@ -26,7 +27,9 @@ namespace XnetTests.Test
                 return Conn.EmitAsync(new PACKET());
             };
 
-            Options.EnableJsonRpc(typeof(Program).Assembly);
+            Options
+                .EnableJsonRpc(typeof(Program).Assembly)
+                .EnableDsaSecuredPackets(DsaKey.Make());
 
             var Services = new ServiceCollection();
             using var Provider = Services.BuildServiceProvider();
@@ -45,7 +48,9 @@ namespace XnetTests.Test
             Options.Endpoint = new IPEndPoint(IPAddress.Any, 7800);
             Options.NetworkId = Guid.Empty;
             Options.PacketProviders.Add(new Program());
-            Options.EnableJsonRpc(typeof(Program).Assembly);
+            Options
+                .EnableJsonRpc(typeof(Program).Assembly)
+                .EnableDsaSecuredPackets(DsaKey.Make());
 
             var Services = new ServiceCollection();
             using var Provider = Services.BuildServiceProvider();
@@ -56,18 +61,8 @@ namespace XnetTests.Test
         /// <summary>
         /// Test packet.
         /// </summary>
-        private class PACKET : Xnet.BasicPacket
+        private class PACKET : DsaSecuredPacket
         {
-            public override async Task ExecuteAsync(Xnet Connection)
-            {
-                Console.WriteLine(Connection.IsServerMode
-                    ? "SERVER RECEIVED: PACKET!"
-                    : "CLIENT RECEIVED: PACKET!");
-
-                _ = CallTestController(Connection);
-                await Connection.EmitAsync(this);
-            }
-
             private static async Task CallTestController(Xnet Connection)
             {
                 var Message = await Connection.CallAsync<TestRpcMessage>(
@@ -76,12 +71,22 @@ namespace XnetTests.Test
                 Console.WriteLine(Message.Text);
             }
 
-            protected override void Decode(BinaryReader Reader)
+            protected override void Encode(BinaryWriter Writer, DsaPubKey PubKey)
             {
             }
 
-            protected override void Encode(BinaryWriter Writer)
+            protected override void Decode(BinaryReader Reader, DsaPubKey PubKey)
             {
+            }
+
+            protected override async Task ExecuteAsync(Xnet Connection, bool Validation)
+            {
+                Console.WriteLine(Connection.IsServerMode
+                    ? "SERVER RECEIVED: PACKET!"
+                    : "CLIENT RECEIVED: PACKET!");
+
+                _ = CallTestController(Connection);
+                await Connection.EmitAsync(new PACKET());
             }
         }
 
