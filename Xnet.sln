@@ -3,9 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet", "Xnet\Xnet.csproj", "{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet", "Xnet\Xnet.csproj", "{799827F7-0BCC-46B4-A75A-3CB4114B0CDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Test", "Xnet.Test\Xnet.Test.csproj", "{709A43EB-C216-46BD-8CE9-4238C8C34559}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Test", "Xnet.Test\Xnet.Test.csproj", "{709A43EB-C216-46BD-8CE9-4238C8C34559}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{23F8208A-D04C-43FD-8D1C-01C4691C30B3}"
+	ProjectSection(SolutionItems) = preProject
+		ReadMe.md = ReadMe.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.JsonRpc", "Xnet.JsonRpc\Xnet.JsonRpc.csproj", "{0FC92500-9427-4D13-962F-D10798C81A5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +28,10 @@ Global
 		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{709A43EB-C216-46BD-8CE9-4238C8C34559}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC92500-9427-4D13-962F-D10798C81A5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC92500-9427-4D13-962F-D10798C81A5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC92500-9427-4D13-962F-D10798C81A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC92500-9427-4D13-962F-D10798C81A5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,6 +26,8 @@ namespace XnetTests.Test
                 return Conn.EmitAsync(new PACKET());
             };
 
+            Options.EnableJsonRpc(typeof(Program).Assembly);
+
             var Services = new ServiceCollection();
             using var Provider = Services.BuildServiceProvider();
             await Xnet.Client(Provider, Options, Cts.Token);
@@ -43,6 +45,7 @@ namespace XnetTests.Test
             Options.Endpoint = new IPEndPoint(IPAddress.Any, 7800);
             Options.NetworkId = Guid.Empty;
             Options.PacketProviders.Add(new Program());
+            Options.EnableJsonRpc(typeof(Program).Assembly);
 
             var Services = new ServiceCollection();
             using var Provider = Services.BuildServiceProvider();
@@ -55,13 +58,22 @@ namespace XnetTests.Test
         /// </summary>
         private class PACKET : Xnet.BasicPacket
         {
-            public override Task ExecuteAsync(Xnet Connection)
+            public override async Task ExecuteAsync(Xnet Connection)
             {
                 Console.WriteLine(Connection.IsServerMode
-                    ? "SERVER RECEIVED: PACKET!" 
+                    ? "SERVER RECEIVED: PACKET!"
                     : "CLIENT RECEIVED: PACKET!");
 
-                return Connection.EmitAsync(this);
+                _ = CallTestController(Connection);
+                await Connection.EmitAsync(this);
+            }
+
+            private static async Task CallTestController(Xnet Connection)
+            {
+                var Message = await Connection.CallAsync<TestRpcMessage>(
+                    "test.hello", new TestRpcMessage { Text = "hi" });
+
+                Console.WriteLine(Message.Text);
             }
 
             protected override void Decode(BinaryReader Reader)
@@ -77,6 +89,29 @@ namespace XnetTests.Test
         protected override void MapTypes()
         {
             Map<PACKET>("test");
+        }
+    }
+
+    public class TestRpcMessage
+    {
+        /// <summary>
+        /// Text.
+        /// </summary>
+        public string Text { get; set; } = string.Empty;
+    }
+
+    [XnetJsonRpcRoute(Name = "test")]
+    public class TestController : XnetJsonRpcController
+    {
+        /// <summary>
+        /// Hello.
+        /// </summary>
+        /// <param name="Message"></param>
+        /// <returns></returns>
+        [XnetJsonRpcRoute(Name = "hello")]
+        public TestRpcMessage Hello([XnetRpcArgs] TestRpcMessage Message)
+        {
+            return Message;
         }
     }
 }
