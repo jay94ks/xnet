@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using XnetDsa.Impls.Protocols;
 
 namespace XnetDsa
@@ -31,19 +32,44 @@ namespace XnetDsa
         public DsaSign SenderSign { get; private set; }
 
         /// <summary>
+        /// Sign this packet using specified key.
+        /// </summary>
+        /// <param name="Key"></param>
+        /// <param name="PubKey"></param>
+        /// <returns></returns>
+        public bool Sign(DsaKey Key, DsaPubKey PubKey = default)
+        {
+            if (Key.Validity == false)
+                return false;
+
+            if (PubKey.Validity == false)
+                PubKey = Key.MakePubKey();
+
+            var Digest = MakeDigest(PubKey);
+            var Sign = Key.Sign(Digest);
+
+            if (Digest.Validity == false || Sign.Validity == false)
+                return false;
+
+            SenderKey = PubKey;
+            SenderSign = Sign;
+            return true;
+        }
+
+        /// <summary>
         /// Make a digest.
         /// </summary>
         /// <param name="Dsa"></param>
-        private DsaDigest MakeDigest()
+        private DsaDigest MakeDigest(DsaPubKey SignerPubKey)
         {
-            var Algorithm = SenderKey.Algorithm ?? DsaAlgorithm.Default;
+            var Algorithm = SignerPubKey.Algorithm ?? DsaAlgorithm.Default;
 
             using var NestedStream = new MemoryStream();
             using (var NestedWriter = new BinaryWriter(NestedStream, Encoding.UTF8, true))
             {
-                SenderKey.Encode(NestedWriter);
+                SignerPubKey.Encode(NestedWriter);
                 NestedWriter.Write7BitEncodedInt64(Timestamp);
-                Encode(NestedWriter, SenderKey);
+                Encode(NestedWriter, SignerPubKey);
             }
 
             NestedStream.Position = 0;
@@ -58,12 +84,7 @@ namespace XnetDsa
                 throw new InvalidOperationException("no DSA private key configured.");
 
             if (SenderKey.Validity == false || SenderSign.Validity == false)
-            {
-                SenderKey = Dsa.PubKey;
-
-                var Digest = MakeDigest();
-                SenderSign = Dsa.Key.Sign(Digest);
-            }
+                Sign(Dsa.Key, Dsa.PubKey);
 
             SenderKey.Encode(Writer);
             Writer.Write7BitEncodedInt64(Timestamp);
@@ -106,7 +127,7 @@ namespace XnetDsa
         {
             var Validation = 
                 SenderKey.Validity == false || SenderSign.Validity == false ||
-                SenderKey.Verify(SenderSign, MakeDigest()) == false;
+                SenderKey.Verify(SenderSign, MakeDigest(SenderKey)) == false;
 
             return ExecuteAsync(Connection, Validation == false);
         }
