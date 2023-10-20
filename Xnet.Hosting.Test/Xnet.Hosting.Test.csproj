@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>XnetTest</RootNamespace>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Xnet.Dsa\Xnet.Dsa.csproj" />
+    <ProjectReference Include="..\Xnet.Hosting\Xnet.Hosting.csproj" />
+    <ProjectReference Include="..\Xnet.JsonRpc\Xnet.JsonRpc.csproj" />
+    <ProjectReference Include="..\Xnet.Replika\Xnet.Replika.csproj" />
+    <ProjectReference Include="..\Xnet\Xnet.csproj" />
+  </ItemGroup>
+
+</Project>

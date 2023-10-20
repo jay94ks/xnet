@@ -1,6 +1,4 @@
-﻿using FASTER.core;
-using System.Security.Cryptography;
-using XnetDsa;
+﻿using XnetDsa;
 using XnetReplika.Impls.Packets;
 
 namespace XnetReplika.Impls
