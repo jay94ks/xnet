@@ -47,10 +47,10 @@ namespace XnetInternals.Internals
         {
             Xnet Xnet = null;
             if (m_Client != null)
-                Xnet = m_Client.Find(Predicate);
+                Xnet = m_Client.FindLast(Predicate);
 
             if (Xnet is null && m_Server != null)
-                Xnet = m_Server.Find(Predicate);
+                Xnet = m_Server.FindLast(Predicate);
 
             return Xnet;
         }

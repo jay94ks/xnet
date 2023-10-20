@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/jay94ks/xnet</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <PackageTags>network; tcp; dsa</PackageTags>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageId>xnetlib.hosting</PackageId>
   </PropertyGroup>
