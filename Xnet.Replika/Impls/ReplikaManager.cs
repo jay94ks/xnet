@@ -39,6 +39,12 @@ namespace XnetReplika.Impls
         public IReplikaRepository Overlay => m_Repository;
 
         /// <inheritdoc/>
+        public DsaPubKey[] GetOwnerKeys(int Offset = 0, int Count = 1024)
+        {
+            return m_Repository.GetOwnerKeys(Offset, Count);
+        }
+
+        /// <inheritdoc/>
         public IReplikaRepository Get(DsaPubKey OwnerKey)
         {
             return m_Repository.GetDictionarySet(OwnerKey);

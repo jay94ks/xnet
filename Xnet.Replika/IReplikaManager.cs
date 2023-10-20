@@ -23,6 +23,12 @@ namespace XnetReplika
         IReplikaRepository Overlay { get; }
 
         /// <summary>
+        /// Get owner keys.
+        /// </summary>
+        /// <returns></returns>
+        DsaPubKey[] GetOwnerKeys(int Offset = 0, int Count = 1024);
+
+        /// <summary>
         /// Get the repository for the owner.
         /// </summary>
         /// <param name="OwnerKey"></param>

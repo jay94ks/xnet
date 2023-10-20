@@ -32,6 +32,20 @@ namespace XnetReplika.Impls
         public event Action<IReplikaRepository, Guid> Changed;
 
         /// <summary>
+        /// Get owner keys.
+        /// </summary>
+        /// <param name="Offset"></param>
+        /// <param name="Count"></param>
+        /// <returns></returns>
+        public DsaPubKey[] GetOwnerKeys(int Offset = 0, int Count = 1024)
+        {
+            lock (m_Dictionaries)
+            {
+                return m_Dictionaries.Keys.Skip(Offset).Take(Count).ToArray();
+            }
+        }
+
+        /// <summary>
         /// Get the dictionary.
         /// </summary>
         /// <param name="Owner"></param>
