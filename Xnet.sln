@@ -22,13 +22,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3420A1E3
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Dsa.Test", "Xnet.Dsa.Test\Xnet.Dsa.Test.csproj", "{1EC33398-4551-4847-8D42-2AA885D15243}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Replika", "Xnet.Replika\Xnet.Replika.csproj", "{A6036E6C-8C3A-4369-8B92-D3F4D89ADB76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Replika", "Xnet.Replika\Xnet.Replika.csproj", "{A6036E6C-8C3A-4369-8B92-D3F4D89ADB76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Replika.Test", "Xnet.Replika.Test\Xnet.Replika.Test.csproj", "{6B7B7E7A-08C0-412D-8289-5BDAEA675E42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Replika.Test", "Xnet.Replika.Test\Xnet.Replika.Test.csproj", "{6B7B7E7A-08C0-412D-8289-5BDAEA675E42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Hosting", "Xnet.Hosting\Xnet.Hosting.csproj", "{BC58DC97-91C8-48C3-BBF7-09600B8A0BFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Hosting", "Xnet.Hosting\Xnet.Hosting.csproj", "{BC58DC97-91C8-48C3-BBF7-09600B8A0BFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Hosting.Test", "Xnet.Hosting.Test\Xnet.Hosting.Test.csproj", "{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Hosting.Test", "Xnet.Hosting.Test\Xnet.Hosting.Test.csproj", "{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Buckets", "Xnet.Buckets\Xnet.Buckets.csproj", "{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +74,10 @@ Global
 		{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
