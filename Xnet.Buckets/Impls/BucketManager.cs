@@ -3,25 +3,25 @@
 namespace XnetBuckets.Impls
 {
     /// <summary>
-    /// Bucket extender.
+    /// Bucket manager.
     /// </summary>
-    internal class BucketExtender : Xnet.BasicPacketProvider<BucketExtender>, Xnet.ConnectionExtender, IBucketManager
+    internal class BucketManager : Xnet.BasicPacketProvider<BucketManager>, Xnet.ConnectionExtender, IBucketManager
     {
         private static readonly object KEY = new();
         private readonly Dictionary<Guid, BucketSubject> m_Subjects = new();
         private readonly HashSet<Xnet> m_Connections = new();
 
         /// <summary>
-        /// Get the <see cref="BucketExtender"/> instance.
+        /// Get the <see cref="BucketManager"/> instance.
         /// </summary>
         /// <param name="Xnet"></param>
         /// <returns></returns>
-        public static BucketExtender Get(Xnet Xnet)
+        public static BucketManager Get(Xnet Xnet)
         {
             if (Xnet.Items.TryGetValue(KEY, out var Temp))
-                return Temp as BucketExtender;
+                return Temp as BucketManager;
 
-            Xnet.Items.TryAdd(KEY, Xnet.GetExtender<BucketExtender>());
+            Xnet.Items.TryAdd(KEY, Xnet.GetExtender<BucketManager>());
             return Get(Xnet);
         }
 

@@ -25,6 +25,17 @@ namespace XnetBuckets
             return Prev;
         }
 
+        /// <summary>
+        /// Make the bucket id from type.
+        /// This refers <see cref="Type"/>'s name value (not FullName).
+        /// </summary>
+        /// <param name="ItemType"></param>
+        /// <returns></returns>
+        public static Guid MakeBucketId(Type ItemType, string BucketName)
+            => BKT_ITEM.MakeItemId(Encoding.UTF8.GetBytes($"BucketId, {BucketName}#{ItemType.Name}"));
+
+        // --
+
         private readonly List<BucketItemEntry> m_Entries = new();
         private readonly SemaphoreSlim m_Semaphore = new(1);
 
@@ -35,12 +46,18 @@ namespace XnetBuckets
         /// <summary>
         /// Initialize a new <see cref="Bucket"/> instance.
         /// </summary>
-        public Bucket(IBucketManager BucketManager, Guid BucketId)
+        private Bucket(IBucketManager BucketManager, Guid BucketId)
         {
             m_BucketManager = BucketManager;
             m_SubjectTcs = new TaskCompletionSource<BucketSubject>();
             this.BucketId = BucketId;
         }
+
+        /// <summary>
+        /// Initialize a new <see cref="Bucket"/> instance.
+        /// </summary>
+        public Bucket(IBucketManager BucketManager, Type ItemType, string BucketName)
+            : this(BucketManager, MakeBucketId(ItemType, BucketName)) { }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -558,5 +575,34 @@ namespace XnetBuckets
         /// <param name="Entry"></param>
         /// <returns></returns>
         protected abstract ValueTask OnAfterPush(BucketItemEntry Entry);
+    }
+
+    /// <summary>
+    /// Bucket for <typeparamref name="TItem"/>. 
+    /// </summary>
+    /// <typeparam name="TItem"></typeparam>
+    public class Bucket<TItem> : Bucket where TItem : IBucketItem, new()
+    {
+        /// <summary>
+        /// Initialize a new <see cref="Bucket"/> instance.
+        /// </summary>
+        /// <param name="BucketManager"></param>
+        /// <param name="BucketName"></param>
+        public Bucket(IBucketManager BucketManager, string BucketName)
+            : base(BucketManager, typeof(TItem), BucketName)
+        {
+        }
+
+        /// <inheritdoc/>
+        protected override bool CanSupport(IBucketItem Item) => Item is TItem;
+
+        /// <inheritdoc/>
+        protected override IBucketItem CreateItem() => new TItem();
+
+        /// <inheritdoc/>
+        protected override ValueTask<bool> OnBeforePush(BucketItemEntry Entry) => ValueTask.FromResult(true);
+
+        /// <inheritdoc/>
+        protected override ValueTask OnAfterPush(BucketItemEntry Entry) => ValueTask.CompletedTask;
     }
 }

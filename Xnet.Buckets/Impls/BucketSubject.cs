@@ -129,7 +129,7 @@ namespace XnetBuckets.Impls
                 if (m_Consumers.Add(Consumer) == false)
                     return false;
 
-                BucketExtender
+                BucketManager
                     .GetConsumingSet(Consumer)
                     .Add(m_BucketId);
 
@@ -150,7 +150,7 @@ namespace XnetBuckets.Impls
                 if (m_Consumers.Remove(Consumer) == false)
                     return false;
 
-                BucketExtender
+                BucketManager
                     .GetConsumingSet(Consumer)
                     .Remove(m_BucketId);
 

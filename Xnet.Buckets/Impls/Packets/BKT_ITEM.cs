@@ -61,7 +61,7 @@ namespace XnetBuckets.Impls.Packets
 
         /// <inheritdoc/>
         public override Task ExecuteAsync(Xnet Connection)
-            => BucketExtender.Get(Connection).BucketItem(Connection, this);
+            => BucketManager.Get(Connection).BucketItem(Connection, this);
 
         /// <inheritdoc/>
         protected override void Encode(BinaryWriter Writer)

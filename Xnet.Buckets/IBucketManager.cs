@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace XnetBuckets
+﻿namespace XnetBuckets
 {
     /// <summary>
     /// Bucket manager.
     /// </summary>
-    public interface IBucketManager
+    public interface IBucketManager : Xnet.Extender
     {
         /// <summary>
         /// Activate the specified bucket asynchronously.

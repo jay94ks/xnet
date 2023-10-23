@@ -13,7 +13,7 @@
 
         /// <inheritdoc/>
         public override Task ExecuteAsync(Xnet Connection)
-            => BucketExtender.Get(Connection).BucketStart(Connection, this);
+            => BucketManager.Get(Connection).BucketStart(Connection, this);
 
         /// <inheritdoc/>
         protected override void Encode(BinaryWriter Writer)
