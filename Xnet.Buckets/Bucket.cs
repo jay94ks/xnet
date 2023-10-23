@@ -48,7 +48,7 @@ namespace XnetBuckets
         /// </summary>
         private Bucket(IBucketManager BucketManager, Guid BucketId)
         {
-            m_BucketManager = BucketManager;
+            m_BucketManager = BucketManager ?? throw new ArgumentNullException(nameof(BucketManager));
             m_SubjectTcs = new TaskCompletionSource<BucketSubject>();
             this.BucketId = BucketId;
         }
@@ -70,7 +70,13 @@ namespace XnetBuckets
             }
 
             Deactivate();
+            OnDispose();
         }
+
+        /// <summary>
+        /// Called to dispose internal objects.
+        /// </summary>
+        protected virtual void OnDispose() { }
 
         /// <summary>
         /// Bucket Id.
@@ -299,6 +305,8 @@ namespace XnetBuckets
 
                     if (Entry is null)
                         break;
+
+                    Dups.Add(Entry.ItemId);
                 }
 
                 await Action.Invoke(Entry);
@@ -396,7 +404,7 @@ namespace XnetBuckets
 
             finally
             {
-                OnNetworkPush?.Invoke(this, GetItemFromEntry(Entry));
+                RaiseNetworkPushEvent(Entry);
             }
 
             return true;
@@ -480,10 +488,10 @@ namespace XnetBuckets
 
                 finally
                 {
-                    OnPush?.Invoke(this, GetItemFromEntry(Entry));
+                    RaisePushEvent(Entry);
                 }
 
-                return false;
+                return true;
             });
 
             if (Result)
@@ -500,6 +508,24 @@ namespace XnetBuckets
             }
 
             return Result;
+        }
+
+        /// <summary>
+        /// Raise the `<see cref="OnPush"/>` event.
+        /// </summary>
+        /// <param name="Entry"></param>
+        internal virtual void RaisePushEvent(BucketItemEntry Entry)
+        {
+            OnPush?.Invoke(this, GetItemFromEntry(Entry));
+        }
+
+        /// <summary>
+        /// Raise the `<see cref="OnNetworkPush"/>` event.
+        /// </summary>
+        /// <param name="Entry"></param>
+        internal virtual void RaiseNetworkPushEvent(BucketItemEntry Entry)
+        {
+            OnNetworkPush?.Invoke(this, GetItemFromEntry(Entry));
         }
 
         /// <summary>
@@ -593,6 +619,16 @@ namespace XnetBuckets
         {
         }
 
+        /// <summary>
+        /// Called when an item is pushed to the bucket.
+        /// </summary>
+        public new event Action<Bucket<TItem>, TItem> OnPush;
+
+        /// <summary>
+        /// Called when an item is pushed from the network to the bucket.
+        /// </summary>
+        public new event Action<Bucket<TItem>, TItem> OnNetworkPush;
+
         /// <inheritdoc/>
         protected override bool CanSupport(IBucketItem Item) => Item is TItem;
 
@@ -604,5 +640,25 @@ namespace XnetBuckets
 
         /// <inheritdoc/>
         protected override ValueTask OnAfterPush(BucketItemEntry Entry) => ValueTask.CompletedTask;
+
+        /// <summary>
+        /// Raise the `<see cref="OnPush"/>` event.
+        /// </summary>
+        /// <param name="Entry"></param>
+        internal override void RaisePushEvent(BucketItemEntry Entry)
+        {
+            base.RaisePushEvent(Entry);
+            OnPush?.Invoke(this, (TItem) GetItemFromEntry(Entry));
+        }
+
+        /// <summary>
+        /// Raise the `<see cref="OnNetworkPush"/>` event.
+        /// </summary>
+        /// <param name="Entry"></param>
+        internal override void RaiseNetworkPushEvent(BucketItemEntry Entry)
+        {
+            base.RaiseNetworkPushEvent(Entry);
+            OnNetworkPush?.Invoke(this, (TItem) GetItemFromEntry(Entry));
+        }
     }
 }

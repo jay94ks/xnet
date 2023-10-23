@@ -30,7 +30,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Hosting", "Xnet.Hostin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Hosting.Test", "Xnet.Hosting.Test\Xnet.Hosting.Test.csproj", "{6DCD54D4-5C92-4E91-A8C3-5C47F085250A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Buckets", "Xnet.Buckets\Xnet.Buckets.csproj", "{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Buckets", "Xnet.Buckets\Xnet.Buckets.csproj", "{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Buckets.Test", "Xnet.Buckets.Test\Xnet.Buckets.Test.csproj", "{75CB9421-4FE2-49D5-B68B-D42CED4A0550}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +80,10 @@ Global
 		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{6B7B7E7A-08C0-412D-8289-5BDAEA675E42} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
 		{BC58DC97-91C8-48C3-BBF7-09600B8A0BFE} = {2C2A81C7-0CEB-4D05-8BFD-E54685654B77}
 		{6DCD54D4-5C92-4E91-A8C3-5C47F085250A} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
+		{75CB9421-4FE2-49D5-B68B-D42CED4A0550} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E39FBE2-9FD2-4452-BB5F-12471CA2E395}
