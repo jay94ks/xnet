@@ -121,7 +121,7 @@ public sealed partial class Xnet
         /// <returns></returns>
         protected TSelf MapFrom(Assembly Assembly, params string[] Kinds)
         {
-            MapFrom(Assembly, Kinds);
+            MapFromInternal(Assembly.GetTypes(), Kinds);
             return this as TSelf;
         }
 
@@ -132,7 +132,7 @@ public sealed partial class Xnet
         /// <returns></returns>
         protected TSelf MapFrom(params Type[] Types)
         {
-            MapFrom(Types, Array.Empty<string>());
+            MapFromInternal(Types, Array.Empty<string>());
             return this as TSelf;
         }
 
@@ -141,7 +141,7 @@ public sealed partial class Xnet
         /// </summary>
         /// <param name="Types"></param>
         /// <param name="Kinds"></param>
-        private void MapFrom(Type[] Types, string[] Kinds)
+        private void MapFromInternal(IEnumerable<Type> Types, string[] Kinds)
         {
             foreach (var Type in Types)
             {
