@@ -3,25 +3,26 @@
 namespace XnetBuckets.Impls
 {
     /// <summary>
-    /// Bucket extender.
+    /// Bucket manager.
     /// </summary>
-    internal class BucketExtender : Xnet.BasicPacketProvider<BucketExtender>, Xnet.ConnectionExtender, IBucketManager
+    internal class BucketManager : Xnet.BasicPacketProvider<BucketManager>, Xnet.ConnectionExtender, IBucketManager
     {
-        private static readonly object KEY = new();
+        private static readonly object KEY_CACHE = new();
+        private static readonly object KEY_CONSET = new();
         private readonly Dictionary<Guid, BucketSubject> m_Subjects = new();
         private readonly HashSet<Xnet> m_Connections = new();
 
         /// <summary>
-        /// Get the <see cref="BucketExtender"/> instance.
+        /// Get the <see cref="BucketManager"/> instance.
         /// </summary>
         /// <param name="Xnet"></param>
         /// <returns></returns>
-        public static BucketExtender Get(Xnet Xnet)
+        public static BucketManager Get(Xnet Xnet)
         {
-            if (Xnet.Items.TryGetValue(KEY, out var Temp))
-                return Temp as BucketExtender;
+            if (Xnet.Items.TryGetValue(KEY_CACHE, out var Temp))
+                return Temp as BucketManager;
 
-            Xnet.Items.TryAdd(KEY, Xnet.GetExtender<BucketExtender>());
+            Xnet.Items.TryAdd(KEY_CACHE, Xnet.GetExtender<BucketManager>());
             return Get(Xnet);
         }
 
@@ -32,10 +33,10 @@ namespace XnetBuckets.Impls
         /// <returns></returns>
         public static BucketConsumingSet GetConsumingSet(Xnet Xnet)
         {
-            if (Xnet.Items.TryGetValue(KEY, out var Temp))
+            if (Xnet.Items.TryGetValue(KEY_CONSET, out var Temp))
                 return Temp as BucketConsumingSet;
 
-            Xnet.Items.TryAdd(KEY, new BucketConsumingSet());
+            Xnet.Items.TryAdd(KEY_CONSET, new BucketConsumingSet());
             return GetConsumingSet(Xnet);
         }
 
