@@ -32,7 +32,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Hosting.Test", "Xnet.H
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Buckets", "Xnet.Buckets\Xnet.Buckets.csproj", "{A2487A54-C0B2-4B30-8DA1-BD3AFB099C48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Buckets.Test", "Xnet.Buckets.Test\Xnet.Buckets.Test.csproj", "{75CB9421-4FE2-49D5-B68B-D42CED4A0550}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xnet.Buckets.Test", "Xnet.Buckets.Test\Xnet.Buckets.Test.csproj", "{75CB9421-4FE2-49D5-B68B-D42CED4A0550}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnet.Streams", "Xnet.Streams\Xnet.Streams.csproj", "{D80E3D76-81E7-4429-9181-5BE4ED9AAD56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XnetStreamTest", "XnetStreamTest\XnetStreamTest.csproj", "{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +88,14 @@ Global
 		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75CB9421-4FE2-49D5-B68B-D42CED4A0550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D80E3D76-81E7-4429-9181-5BE4ED9AAD56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D80E3D76-81E7-4429-9181-5BE4ED9AAD56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D80E3D76-81E7-4429-9181-5BE4ED9AAD56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D80E3D76-81E7-4429-9181-5BE4ED9AAD56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +109,7 @@ Global
 		{BC58DC97-91C8-48C3-BBF7-09600B8A0BFE} = {2C2A81C7-0CEB-4D05-8BFD-E54685654B77}
 		{6DCD54D4-5C92-4E91-A8C3-5C47F085250A} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
 		{75CB9421-4FE2-49D5-B68B-D42CED4A0550} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
+		{3D2ACA3D-A2D1-4BB0-A01A-A3E0210BD0D0} = {3420A1E3-B537-4795-A681-F969D6F41DDC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E39FBE2-9FD2-4452-BB5F-12471CA2E395}
