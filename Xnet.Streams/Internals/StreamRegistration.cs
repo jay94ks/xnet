@@ -1,4 +1,6 @@
-﻿namespace XnetStreams.Internals
+﻿using Newtonsoft.Json.Linq;
+
+namespace XnetStreams.Internals
 {
     /// <summary>
     /// Stream registration.
@@ -15,11 +17,14 @@
         /// <param name="Xnet"></param>
         /// <param name="Stream"></param>
         /// <param name="Id"></param>
-        public StreamRegistration(StreamRegistry Registry, Xnet Xnet, Stream Stream)
+        public StreamRegistration(StreamRegistry Registry, Xnet Xnet, StreamContext Context)
         {
             m_Registry = Registry;
             this.Xnet = Xnet;
-            this.Stream = Stream;
+
+            Stream = Context.Stream;
+            Path = Context.Options.Path;
+            Extras = Context.Options.Extras;
 
             m_Hook = Xnet.Closing.Register(Dispose, false);
         }
@@ -28,6 +33,16 @@
         /// Connection.
         /// </summary>
         public Xnet Xnet { get; }
+
+        /// <summary>
+        /// Path.
+        /// </summary>
+        public string Path { get; }
+
+        /// <summary>
+        /// Extras.
+        /// </summary>
+        public JObject Extras { get; }
 
         /// <summary>
         /// Stream.

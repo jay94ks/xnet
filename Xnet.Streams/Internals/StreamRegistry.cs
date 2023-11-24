@@ -14,11 +14,10 @@ namespace XnetStreams.Internals
         /// <summary>
         /// Register the stream for providing <see cref="PKT_OPEN_RESULT"/>.
         /// </summary>
-        /// <param name="Stream"></param>
-        /// <param name="Result"></param>
-        public StreamRegistration Register(Xnet Xnet, Stream Stream)
+        /// <param name="Context"></param>
+        public StreamRegistration Register(Xnet Xnet, StreamContext Context)
         {
-            var Retval = new StreamRegistration(this, Xnet, Stream);
+            var Retval = new StreamRegistration(this, Xnet, Context);
 
             Retval.Id = PacketDispatcher.MakeId();
             while (m_Streams.TryAdd(Retval.Id, Retval) == false)

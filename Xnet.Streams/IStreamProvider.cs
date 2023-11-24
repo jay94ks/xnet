@@ -7,6 +7,15 @@
     public interface IStreamProvider
     {
         /// <summary>
+        /// Get the metadata asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Options"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        ValueTask<StreamMetadata?> GetMetadataAsync(Xnet Xnet, StreamOptions Options, CancellationToken Token);
+
+        /// <summary>
         /// Get the stream asynchronously.
         /// </summary>
         /// <param name="Xnet"></param>

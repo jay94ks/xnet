@@ -75,6 +75,9 @@ namespace XnetStreams.Internals
             Map<PKT_SETLENGTH_RESULT>("stream.setlen.res");
             Map<PKT_READTIMEOUT_RESULT>("stream.readtimeout.res");
             Map<PKT_WRITETIMEOUT_RESULT>("stream.writetimeout.res");
+
+            Map<PKT_QUERY>("stream.query");
+            Map<PKT_QUERY_RESULT>("stream.query.res");
         }
 
         /// <summary>
@@ -124,6 +127,70 @@ namespace XnetStreams.Internals
         }
 
         /// <summary>
+        /// Query the metadata with options asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Options"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">the remote connection is not alive.</exception>
+        /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
+        /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
+        /// <exception cref="OperationCanceledException">the token is triggered.</exception>
+        public async Task<StreamMetadata> QueryAsync(Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
+        {
+            using var Reservation = m_Dispatcher.Reserve();
+            var Open = new PKT_QUERY
+            {
+                TraceId = Reservation.TraceId,
+                Timeout = Options.Timeout,
+                Path = Options.Path ?? string.Empty,
+                Extras = Options.Extras
+            };
+
+            if (await Xnet.EmitAsync(Open, Token) == false)
+            {
+                Token.ThrowIfCancellationRequested();
+                throw new InvalidOperationException("the remote connection is not alive.");
+            }
+
+            using (Xnet.Closing.Register(Reservation.Dispose, false))
+            {
+                var Handled = false;
+                try
+                {
+                    var Packet = await Reservation.WaitAsync(Token);
+                    if (Packet is null)
+                        throw new InvalidOperationException("the remote connection is closed before completion.");
+
+                    if (Packet is not PKT_QUERY_RESULT Result)
+                        throw new InvalidDataException("the dispatched result is not correct.");
+
+                    Handled = true;
+
+                    if (Result.Status == StreamStatus.Ok)
+                        return Result.Metadata.Value;
+
+                    if (Result.Status == StreamStatus.NotImplemented)
+                        throw new NotSupportedException("the remote stream does not implement metadata provider.");
+
+                    throw new StreamException(Result.Status);
+                }
+
+                finally
+                {
+                    if (Handled == false)
+                    {
+                        var Packet = await Reservation.TryPeekAsync();
+                        if (Packet != null)
+                        {
+                            await CloseUnhandledStreamAsync(Xnet, Packet.Id);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Open the stream with options asynchronously.
         /// </summary>
         /// <param name="Xnet"></param>
@@ -146,7 +213,7 @@ namespace XnetStreams.Internals
                 Mode = Options.Mode,
                 Access = Options.Access,
                 Share = Options.Share,
-                Extras = Options.Extras,
+                Extras = Options.Extras
             };
 
             if (await Xnet.EmitAsync(Open, Token) == false)
@@ -170,7 +237,7 @@ namespace XnetStreams.Internals
                     Handled = true;
                     if (Result.Status == StreamStatus.Ok)
                     {
-                        return new RemoteStream(Xnet, Result);
+                        return new RemoteStream(Xnet, Result, Options);
                     }
 
                     throw new StreamException(Result.Status);
@@ -194,7 +261,7 @@ namespace XnetStreams.Internals
         /// Close the unhandled stream asynchronously.
         /// </summary>
         /// <param name="Xnet"></param>
-        /// <param name="Reservation"></param>
+        /// <param name="Id"></param>
         /// <returns></returns>
         private static async ValueTask CloseUnhandledStreamAsync(Xnet Xnet, Guid Id)
         {
@@ -244,10 +311,111 @@ namespace XnetStreams.Internals
                     //case PKT_TELL_RESULT:
                     //case PKT_SETLENGTH_RESULT:
                     //    break;
-
                 }
 
                 await Task.CompletedTask;
+            }
+        }
+
+
+        /// <summary>
+        /// Query the stream information.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Packet"></param>
+        /// <returns></returns>
+        public async Task QueryAsync(Xnet Xnet, PKT_QUERY Packet)
+        {
+            var Context = new StreamContext
+            {
+                Connection = Xnet,
+                Stream = null,
+                Request = StreamRequest.Metadata,
+                Status = StreamStatus.PathNotFound,
+                Timeout = Packet.Timeout,
+                Path = Packet.Path,
+                Mode = FileMode.Open,
+                Access = FileAccess.Read,
+                Share = FileShare.ReadWrite | FileShare.Delete,
+                Extras = Packet.Extras,
+            };
+
+            var Result = new PKT_QUERY_RESULT
+            {
+                Id = Guid.Empty,
+                TraceId = Packet.TraceId,
+                Status = StreamStatus.PathNotFound,
+                Metadata = null
+            };
+
+            // --> final request handler.
+            Task FinalRequestHandler()
+            {
+                return Task.CompletedTask;
+            }
+
+            using var Cts = CancellationTokenSource.CreateLinkedTokenSource(Xnet.Closing);
+            Context.RequestTimeout = Cts.Token;
+            try
+            {
+                if (Packet.Timeout >= 0 && Packet.Timeout != int.MaxValue)
+                    Cts.CancelAfter(TimeSpan.FromMilliseconds(Packet.Timeout));
+
+                if (m_Delegate != null)
+                    await m_Delegate.Invoke(Context, FinalRequestHandler);
+
+                else
+                    await FinalRequestHandler();
+            }
+
+            catch (OperationCanceledException e) when (e.CancellationToken == Cts.Token)
+            {
+                Context.Metadata = null;
+                await SetRequestTimeout(Context);
+            }
+
+            catch
+            {
+                Context.Status = StreamStatus.UnhandledException;
+                throw;
+            }
+
+            finally
+            {
+                await CloseStreamIfSetAsync(Context);
+
+                if (Context.Metadata.HasValue)
+                    Context.Status = StreamStatus.Ok;
+
+                Result.Status = Context.Status;
+                Result.Metadata = Context.Metadata;
+
+                await Xnet.EmitAsync(Result);
+            }
+        }
+
+        /// <summary>
+        /// Close the stream if set asynchronously.
+        /// </summary>
+        /// <param name="Context"></param>
+        /// <returns></returns>
+        private static async Task CloseStreamIfSetAsync(StreamContext Context)
+        {
+            var Stream = Context.Stream;
+            if (Stream != null)
+            {
+                if (Context.Metadata is null)
+                    Context.Status = StreamStatus.NotImplemented;
+
+                try { Context.Stream.Close(); } catch { }
+                try { await Context.Stream.DisposeAsync(); } catch { }
+
+                Context.Stream = null;
+            }
+
+            else if (Context.Metadata is null)
+            {
+                Context.Status = StreamStatus.PathNotFound;
             }
         }
 
@@ -263,6 +431,7 @@ namespace XnetStreams.Internals
             {
                 Connection = Xnet,
                 Stream = null,
+                Request = StreamRequest.Stream,
                 Status = StreamStatus.PathNotFound,
                 Timeout = Packet.Timeout,
                 Path = Packet.Path,
@@ -292,14 +461,26 @@ namespace XnetStreams.Internals
                 return Task.CompletedTask;
             }
 
+            using var Cts = CancellationTokenSource.CreateLinkedTokenSource(Xnet.Closing);
+
+            Context.RequestTimeout = Cts.Token;
             try
             {
+                if (Packet.Timeout >= 0 && Packet.Timeout != int.MaxValue)
+                    Cts.CancelAfter(TimeSpan.FromMilliseconds(Packet.Timeout));
+
                 if (m_Delegate != null)
                     await m_Delegate.Invoke(Context, FinalRequestHandler);
 
                 else
                     await FinalRequestHandler();
             }
+
+            catch (OperationCanceledException e) when (e.CancellationToken == Cts.Token)
+            {
+                await SetRequestTimeout(Context);
+            }
+
             catch
             {
                 if (Context.Stream != null)
@@ -316,7 +497,6 @@ namespace XnetStreams.Internals
 
             finally
             {
-
                 var Stream = Context.Stream;
                 if (Stream is null)
                 {
@@ -330,7 +510,7 @@ namespace XnetStreams.Internals
 
                 else
                 {
-                    var Reg = m_Registry.Register(Xnet, Stream);
+                    var Reg = m_Registry.Register(Xnet, Context);
 
                     // --> registration id.
                     Result.Id = Reg.Id;
@@ -343,6 +523,24 @@ namespace XnetStreams.Internals
 
                 await Xnet.EmitAsync(Result);
             }
+        }
+
+        /// <summary>
+        /// Set the request timeout for <see cref="StreamContext"/>.
+        /// </summary>
+        /// <param name="Context"></param>
+        /// <returns></returns>
+        private static async Task SetRequestTimeout(StreamContext Context)
+        {
+            if (Context.Stream != null)
+            {
+                try { Context.Stream.Close(); } catch { }
+                try { await Context.Stream.DisposeAsync(); } catch { }
+
+                Context.Stream = null;
+            }
+
+            Context.Status = StreamStatus.Timeout;
         }
 
         /// <summary>
@@ -743,11 +941,11 @@ namespace XnetStreams.Internals
         /// <returns></returns>
         internal async Task TellAsync(Xnet Xnet, PKT_TELL Tell)
         {
-            var Result = new PKT_SEEK_RESULT
+            var Result = new PKT_TELL_RESULT
             {
                 Id = Tell.Id,
                 TraceId = Tell.TraceId,
-                Status = StreamStatus.NotImplemented
+                Status = StreamStatus.NotImplemented,
             };
 
             try
@@ -836,7 +1034,7 @@ namespace XnetStreams.Internals
                 var Cursor = Reg.Stream.Position;
 
                 try { await Reg.Stream.WriteAsync(Write.Data, Xnet.Closing); }
-                catch(Exception Exception)
+                catch (Exception Exception)
                 {
                     if (Exception is OperationCanceledException Oce &&
                         Oce.CancellationToken == Xnet.Closing)
@@ -862,6 +1060,7 @@ namespace XnetStreams.Internals
 
                     else
                         Result.Status = StreamStatus.Broken;
+
                 }
 
                 finally
@@ -890,7 +1089,7 @@ namespace XnetStreams.Internals
         /// <returns></returns>
         internal async Task FlushAsync(Xnet Xnet, PKT_FLUSH Flush)
         {
-            var Result = new PKT_WRITE_RESULT
+            var Result = new PKT_FLUSH_RESULT
             {
                 Id = Flush.Id,
                 TraceId = Flush.TraceId,
@@ -916,7 +1115,7 @@ namespace XnetStreams.Internals
                 try { await Reg.Stream.FlushAsync(Xnet.Closing); }
                 catch (Exception Exception)
                 {
-                    if (Exception is OperationCanceledException Oce && 
+                    if (Exception is OperationCanceledException Oce &&
                         Oce.CancellationToken == Xnet.Closing)
                     {
                         Result = null;

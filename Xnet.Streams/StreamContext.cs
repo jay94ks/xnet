@@ -21,14 +21,29 @@ namespace XnetStreams
         public Xnet Connection { get; set; }
 
         /// <summary>
-        /// Open Options.
+        /// Request type.
         /// </summary>
-        public StreamOptions Options { get; set; }
+        public StreamRequest Request { get; set; } = StreamRequest.Stream;
 
         /// <summary>
         /// Stream status.
         /// </summary>
         public StreamStatus Status { get; set; } = StreamStatus.PathNotFound;
+
+        /// <summary>
+        /// Triggered when request timeout reached.
+        /// </summary>
+        public CancellationToken RequestTimeout { get; set; }
+
+        /// <summary>
+        /// Open Options.
+        /// </summary>
+        public StreamOptions Options { get; set; }
+
+        /// <summary>
+        /// Metadata.
+        /// </summary>
+        public StreamMetadata? Metadata { get; set; }
 
         /// <summary>
         /// Stream to provide.

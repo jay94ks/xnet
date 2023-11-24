@@ -137,11 +137,26 @@ namespace XnetStreams
 
             try
             {
-                var Stream = await Provider.GetStreamAsync(Conn, Context.Options, Conn.Closing);
-                if (Stream != null)
+                if (Context.Request == StreamRequest.Metadata)
                 {
-                    Context.Stream = Stream;
-                    Context.Status = StreamStatus.Ok;
+                    var Metadata = await Provider.GetMetadataAsync(Conn, Context.Options, Context.RequestTimeout);
+                    if (Metadata.HasValue)
+                    {
+                        Context.Metadata = Metadata;
+                        Context.Status = StreamStatus.Ok;
+                        return;
+                    }
+                }
+
+                else if (Context.Request == StreamRequest.Stream)
+                {
+                    var Stream = await Provider.GetStreamAsync(Conn, Context.Options, Context.RequestTimeout);
+                    if (Stream != null)
+                    {
+                        Context.Stream = Stream;
+                        Context.Status = StreamStatus.Ok;
+                        return;
+                    }
                 }
             }
 
@@ -161,8 +176,9 @@ namespace XnetStreams
                             .GetAwaiter().GetResult();
                     }, false);
                 }
-
             }
+
+            await Next.Invoke();
         }
     }
 }

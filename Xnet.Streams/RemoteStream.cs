@@ -21,7 +21,7 @@ namespace XnetStreams
         /// </summary>
         /// <param name="Xnet"></param>
         /// <param name="Open"></param>
-        internal RemoteStream(Xnet Xnet, PKT_OPEN_RESULT Open)
+        internal RemoteStream(Xnet Xnet, PKT_OPEN_RESULT Open, StreamOptions Options)
         {
             Connection = Xnet;
             Closing = (m_Disposing = new()).Token;
@@ -36,7 +36,6 @@ namespace XnetStreams
         /// Stream Id.
         /// </summary>
         internal Guid Id => m_Open.Id;
-
 
         /// <summary>
         /// Underlying connection.
@@ -220,7 +219,7 @@ namespace XnetStreams
             {
                 Id = Id,
                 Origin = Origin,
-                Cursor = Offset,
+                Cursor = Offset
             };
 
             var Result = await RequestAsync<PKT_SEEK_RESULT>(Seek, Token);
@@ -263,19 +262,22 @@ namespace XnetStreams
                 Size = Size
             };
 
-            var Result = await RequestAsync<PKT_READ_RESULT>(Read, Token);
-            if (Result is null)
-                throw new InvalidOperationException("the remote connection is closed before completion.");
-
-            if (Result.Status == StreamStatus.Ok)
+            while (true)
             {
-                if (CanSeek == true)
-                    m_Cursor += Result.Data.Length;
+                var Result = await RequestAsync<PKT_READ_RESULT>(Read, Token);
+                if (Result is null)
+                    throw new InvalidOperationException("the remote connection is closed before completion.");
 
-                return Result.Data;
+                if (Result.Status == StreamStatus.Ok)
+                {
+                    if (CanSeek == true)
+                        m_Cursor += Result.Data.Length;
+
+                    return Result.Data;
+                }
+
+                throw new StreamException(Result.Status);
             }
-
-            throw new StreamException(Result.Status);
         }
 
         /// <inheritdoc/>
@@ -394,19 +396,22 @@ namespace XnetStreams
                 Data = Data
             };
 
-            var Result = await RequestAsync<PKT_WRITE_RESULT>(Write, Token);
-            if (Result is null)
-                throw new InvalidOperationException("the remote connection is closed before completion.");
-
-            if (Result.Status == StreamStatus.Ok)
+            while (true)
             {
-                if (CanSeek == true)
-                    m_Cursor += Result.Size;
+                var Result = await RequestAsync<PKT_WRITE_RESULT>(Write, Token);
+                if (Result is null)
+                    throw new InvalidOperationException("the remote connection is closed before completion.");
 
-                return Result.Size;
+                if (Result.Status == StreamStatus.Ok)
+                {
+                    if (CanSeek == true)
+                        m_Cursor += Result.Size;
+
+                    return Result.Size;
+                }
+
+                throw new StreamException(Result.Status);
             }
-
-            throw new StreamException(Result.Status);
         }
 
         /// <inheritdoc/>
@@ -471,17 +476,20 @@ namespace XnetStreams
                 Length = Value
             };
 
-            var Result = await RequestAsync<PKT_SETLENGTH_RESULT>(SetLength, Token);
-            if (Result is null)
-                throw new InvalidOperationException("the remote connection is closed before completion.");
-
-            if (Result.Status == StreamStatus.Ok)
+            while (true)
             {
-                m_Open.Length = Result.Length;
-                return;
-            }
+                var Result = await RequestAsync<PKT_SETLENGTH_RESULT>(SetLength, Token);
+                if (Result is null)
+                    throw new InvalidOperationException("the remote connection is closed before completion.");
 
-            throw new StreamException(Result.Status);
+                if (Result.Status == StreamStatus.Ok)
+                {
+                    m_Open.Length = Result.Length;
+                    return;
+                }
+
+                throw new StreamException(Result.Status);
+            }
         }
 
         /// <inheritdoc/>
@@ -492,7 +500,7 @@ namespace XnetStreams
         {
             var Flush = new PKT_FLUSH
             {
-                Id = Id
+                Id = Id,
             };
 
             try { await RequestAsync<PKT_FLUSH_RESULT>(Flush, Token); }

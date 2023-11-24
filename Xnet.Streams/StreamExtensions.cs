@@ -1,4 +1,6 @@
-﻿using XnetStreams.Internals;
+﻿using Newtonsoft.Json.Linq;
+using XnetStreams.Internals;
+using static Xnet;
 
 namespace XnetStreams
 {
@@ -30,6 +32,39 @@ namespace XnetStreams
         }
 
         /// <summary>
+        /// Get the extender instance.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        private static StreamExtender GetExtender(Xnet Xnet)
+        {
+            var Extender = StreamExtender.Get(Xnet);
+            if (Extender is null)
+                throw new NotSupportedException("the remote stream feature is not enabled.");
+
+            return Extender;
+        }
+
+        /// <summary>
+        /// Query the metadata with options asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Options"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">the remote connection is not alive.</exception>
+        /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
+        /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
+        /// <exception cref="OperationCanceledException">the token is triggered.</exception>
+        /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
+        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
+        {
+            return GetExtender(Xnet).QueryAsync(Xnet, Options, Token);
+        }
+
+
+        /// <summary>
         /// Open the remote stream with options asynchronously.
         /// </summary>
         /// <param name="Xnet"></param>
@@ -43,11 +78,35 @@ namespace XnetStreams
         /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
         public static Task<RemoteStream> OpenAsync(this Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
         {
-            var Extender = StreamExtender.Get(Xnet);
-            if (Extender is null)
-                throw new NotSupportedException("the remote stream feature is not enabled.");
+            return GetExtender(Xnet).OpenAsync(Xnet, Options, Token);
+        }
 
-            return Extender.OpenAsync(Xnet, Options, Token);
+        /// <summary>
+        /// Query the metadata with options asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Path"></param>
+        /// <param name="Extras"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">the remote connection is not alive.</exception>
+        /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
+        /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
+        /// <exception cref="OperationCanceledException">the token is triggered.</exception>
+        /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
+        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, JObject Extras, int Timeout, CancellationToken Token = default)
+        {
+            var Options = new StreamOptions
+            {
+                Path = Path,
+                Timeout = Timeout,
+                Mode = FileMode.Open,
+                Access = FileAccess.ReadWrite,
+                Share = FileShare.ReadWrite | FileShare.Delete,
+                Extras = Extras,
+            };
+
+            return QueryAsync(Xnet, Options, Token);
         }
 
         /// <summary>
@@ -115,5 +174,35 @@ namespace XnetStreams
         {
             return OpenAsync(Xnet, Path, FileMode.Open, FileAccess.Read, FileShare.Read, Token);
         }
+
+
+        /// <summary>
+        /// Query the metadata with options asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Path"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">the remote connection is not alive.</exception>
+        /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
+        /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
+        /// <exception cref="OperationCanceledException">the token is triggered.</exception>
+        /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
+        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, CancellationToken Token = default) => QueryAsync(Xnet, Path, -1, Token);
+
+        /// <summary>
+        /// Query the metadata with options asynchronously.
+        /// </summary>
+        /// <param name="Xnet"></param>
+        /// <param name="Path"></param>
+        /// <param name="Timeout"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">the remote connection is not alive.</exception>
+        /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
+        /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
+        /// <exception cref="OperationCanceledException">the token is triggered.</exception>
+        /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
+        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, int Timeout, CancellationToken Token = default) => QueryAsync(Xnet, Path, null, Timeout, Token);
     }
 }

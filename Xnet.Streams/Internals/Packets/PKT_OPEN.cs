@@ -98,7 +98,7 @@ namespace XnetStreams.Internals.Packets
                 return;
             }
 
-            var Bson = EncodeOptions();
+            var Bson = EncodeOptions(Extras);
 
             Writer.Write7BitEncodedInt(Bson.Length);
             Writer.Write(Bson);
@@ -108,7 +108,7 @@ namespace XnetStreams.Internals.Packets
         /// Encode the options object.
         /// </summary>
         /// <returns></returns>
-        private byte[] EncodeOptions()
+        internal static byte[] EncodeOptions(JObject Extras)
         {
             using var Stream = new MemoryStream();
             using (var Bson = new BsonDataWriter(Stream))
@@ -126,7 +126,7 @@ namespace XnetStreams.Internals.Packets
         /// </summary>
         /// <param name="Reader"></param>
         /// <returns></returns>
-        private JObject DecodeOptions(BinaryReader Reader)
+        internal static JObject DecodeOptions(BinaryReader Reader)
         {
             var Len = Reader.Read7BitEncodedInt();
             if (Len <= 0)

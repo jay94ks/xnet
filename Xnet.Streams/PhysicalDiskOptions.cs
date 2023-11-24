@@ -55,6 +55,10 @@ namespace XnetStreams
                 ? Context.Path.Substring(PathToMap.Length)
                 : Context.Path;
 
+            PathName = string.Join('/', PathName.Split('/', '\\')
+                .Where(X => string.IsNullOrWhiteSpace(X) == false)
+                .Where(X => X != "." && X != ".."));
+
             var FullPath = Path.Combine(Options.Directory, PathName);
             if (await ForceOptionsAsync(Options, Context, Next, FullPath) == false)
                 return;
@@ -75,16 +79,30 @@ namespace XnetStreams
                         Context.Mode = FileMode.OpenOrCreate;
                     }
 
-                    Context.Stream = new FileStream(FullPath, 
-                        Context.Mode, Context.Access, Context.Share, 
-                        16384, true);
-
-                    if (ToEnd)
+                    if (Context.Request == StreamRequest.Metadata)
                     {
-                        Context.Stream.Seek(0, SeekOrigin.End);
+                        var Attrs = File.GetAttributes(FullPath);
+                        if (Attrs.HasFlag(FileAttributes.Directory))
+                            SetMetadataFromDirectory(Context, FullPath);
+
+                        else
+                            SetMetadataFromFile(Context, FullPath);
                     }
 
-                    Context.Status = StreamStatus.Ok;
+                    else if (Context.Request == StreamRequest.Stream)
+                    {
+                        Context.Stream = new FileStream(FullPath,
+                            Context.Mode, Context.Access, Context.Share,
+                            16384, true);
+
+                        if (ToEnd)
+                        {
+                            Context.Stream.Seek(0, SeekOrigin.End);
+                        }
+
+                        Context.Status = StreamStatus.Ok;
+                    }
+
                 }
 
                 catch (Exception Exception)
@@ -100,6 +118,56 @@ namespace XnetStreams
                         Context.Stream = null;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Set the metadata from directory info.
+        /// </summary>
+        /// <param name="Context"></param>
+        /// <param name="FullPath"></param>
+        private static void SetMetadataFromDirectory(StreamContext Context, string FullPath)
+        {
+            Context.Status = StreamStatus.PathNotFound;
+
+            var Info = new DirectoryInfo(FullPath);
+            if (Info.Exists)
+            {
+                Context.Metadata = new StreamMetadata()
+                {
+                    IsDirectory = true,
+                    CreationTime = Info.CreationTime.ToUniversalTime(),
+                    LastAccessTime = Info.LastAccessTime.ToUniversalTime(),
+                    LastWriteTime = Info.LastWriteTime.ToUniversalTime(),
+                    TotalSize = 0
+                };
+
+                Context.Status = StreamStatus.Ok;
+            }
+        }
+
+        /// <summary>
+        /// Set the metadata from file info.
+        /// </summary>
+        /// <param name="Context"></param>
+        /// <param name="FullPath"></param>
+        private static void SetMetadataFromFile(StreamContext Context, string FullPath)
+        {
+            Context.Status = StreamStatus.PathNotFound;
+
+            var Info = new FileInfo(FullPath);
+            if (Info.Exists)
+            {
+                Context.Metadata = new StreamMetadata()
+                {
+                    IsDirectory = false,
+                    CreationTime = Info.CreationTime.ToUniversalTime(),
+                    LastAccessTime = Info.LastAccessTime.ToUniversalTime(),
+                    LastWriteTime = Info.LastWriteTime.ToUniversalTime(),
+                    TotalSize = Info.Length
+                };
+
+                Context.Status = StreamStatus.Ok;
             }
         }
 
