@@ -78,19 +78,27 @@ namespace XnetStreamTest
             var Name = $"test/hello.txt";
             try
             {
+                var Meta = await Xnet.QueryAsync(Name);
+
+                Console.WriteLine($"Is Directory: {Meta.IsDirectory}.");
+                Console.WriteLine($"Creation Time: {Meta.CreationTime}.");
+                Console.WriteLine($"Last Access Time: {Meta.LastAccessTime}.");
+                Console.WriteLine($"Last Write Time: {Meta.LastWriteTime}.");
+                Console.WriteLine($"Total Size: {Meta.TotalSize}.");
+
                 await using var Stream = await Xnet.OpenAsync(Name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
                 using (var Reader = new StreamReader(Stream, Encoding.UTF8, true, 2048, true))
                 {
                     var Data = await Reader.ReadToEndAsync();
-                    //Console.WriteLine(Data);
+                    Console.WriteLine(Data);
                 }
 
                 await Stream.WriteAsync(Encoding.UTF8.GetBytes("Hello World.\r\n"));
                 await Stream.WriteAsync(Encoding.UTF8.GetBytes("This works very well.\r\n\r\n"));
-
                 await Stream.FlushAsync();
             }
+
             catch(Exception Error)
             {
                 Console.WriteLine(Error.Message);
