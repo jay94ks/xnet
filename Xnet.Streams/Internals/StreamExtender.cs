@@ -699,7 +699,7 @@ namespace XnetStreams.Internals
                     return;
                 }
 
-                if (Read.Size >= ushort.MaxValue)
+                if (Read.Size > ushort.MaxValue / 2)
                     Read.Size = ushort.MaxValue / 2;
 
                 if (Reg.Stream.CanRead == false)
