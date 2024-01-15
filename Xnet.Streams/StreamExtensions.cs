@@ -58,7 +58,7 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
-        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
+        public static Task<StreamMetadata?> QueryAsync(this Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
         {
             return GetExtender(Xnet).QueryAsync(Xnet, Options, Token);
         }
@@ -94,7 +94,7 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
-        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, JObject Extras, int Timeout, CancellationToken Token = default)
+        public static Task<StreamMetadata?> QueryAsync(this Xnet Xnet, string Path, JObject Extras, int Timeout, CancellationToken Token = default)
         {
             var Options = new StreamOptions
             {
@@ -188,7 +188,7 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
-        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, CancellationToken Token = default) => QueryAsync(Xnet, Path, -1, Token);
+        public static Task<StreamMetadata?> QueryAsync(this Xnet Xnet, string Path, CancellationToken Token = default) => QueryAsync(Xnet, Path, -1, Token);
 
         /// <summary>
         /// Query the metadata with options asynchronously.
@@ -203,6 +203,6 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="NotSupportedException">the remote stream feature is not enabled.</exception>
-        public static Task<StreamMetadata> QueryAsync(this Xnet Xnet, string Path, int Timeout, CancellationToken Token = default) => QueryAsync(Xnet, Path, null, Timeout, Token);
+        public static Task<StreamMetadata?> QueryAsync(this Xnet Xnet, string Path, int Timeout, CancellationToken Token = default) => QueryAsync(Xnet, Path, null, Timeout, Token);
     }
 }

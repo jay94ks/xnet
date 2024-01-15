@@ -153,11 +153,11 @@ public sealed partial class Xnet : IDisposable
             await OnConnectedAsync();
             while (Closing.IsCancellationRequested == false)
             {
-                var Lenb = await m_Socket.ReceiveAsync(sizeof(ushort));
+                var Lenb = await m_Socket.ReceiveAsync(sizeof(int));
                 if (Lenb.Length <= 0)
                     break;
 
-                var Len = Lenb[0] | (Lenb[1] << 8);
+                var Len = Lenb[0] | (Lenb[1] << 8) | (Lenb[2] << 16) | (Lenb[3] << 24);
                 if (Len <= 0)
                     continue;
 
@@ -173,6 +173,7 @@ public sealed partial class Xnet : IDisposable
             }
         }
 
+        catch { }
         finally
         {
             Dispose();
@@ -276,11 +277,13 @@ public sealed partial class Xnet : IDisposable
             var Frame = Stream.ToArray();
             var Length = Frame.Length;
 
-            Array.Resize(ref Frame, Frame.Length + sizeof(ushort));
-            Array.Copy(Frame, 0, Frame, sizeof(ushort), Length);
+            Array.Resize(ref Frame, Frame.Length + sizeof(int));
+            Array.Copy(Frame, 0, Frame, sizeof(int), Length);
 
             Frame[0] = (byte)(Length & 0xff);
             Frame[1] = (byte)(Length >> 8);
+            Frame[2] = (byte)(Length >> 16);
+            Frame[3] = (byte)(Length >> 24);
             return Frame;
         }
 

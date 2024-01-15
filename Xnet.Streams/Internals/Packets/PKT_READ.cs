@@ -10,7 +10,7 @@ namespace XnetStreams.Internals.Packets
         /// <summary>
         /// Required size.
         /// </summary>
-        public ushort Size { get; set; }
+        public int Size { get; set; }
 
         /// <inheritdoc/>
         public override Task ExecuteAsync(Xnet Connection)
@@ -21,7 +21,9 @@ namespace XnetStreams.Internals.Packets
         {
             base.Decode(Reader);
             Size = Reader.ReadByte();
-            Size |= (ushort)(Reader.ReadByte() << 8);
+            Size |= (Reader.ReadByte() << 8);
+            Size |= (Reader.ReadByte() << 16);
+            Size |= (Reader.ReadByte() << 24);
         }
 
         /// <inheritdoc/>
@@ -30,6 +32,8 @@ namespace XnetStreams.Internals.Packets
             base.Encode(Writer);
             Writer.Write((byte)(Size & 0xff));
             Writer.Write((byte)(Size >> 8));
+            Writer.Write((byte)(Size >> 16));
+            Writer.Write((byte)(Size >> 24));
         }
     }
 }

@@ -12,21 +12,22 @@ namespace XnetStreams
         private readonly PKT_OPEN_RESULT m_Open;
         private readonly StreamExtender m_Extender;
         private readonly IDisposable m_Closing;
-
+        private readonly IStreamStatisticsCapturer m_Capturer;
         private long m_Cursor;
         private bool m_Opened = true;
-
         /// <summary>
         /// Initialize a new <see cref="RemoteStream"/> instance.
         /// </summary>
         /// <param name="Xnet"></param>
         /// <param name="Open"></param>
-        internal RemoteStream(Xnet Xnet, PKT_OPEN_RESULT Open, StreamOptions Options)
+        internal RemoteStream(Xnet Xnet, PKT_OPEN_RESULT Open, IStreamStatisticsCapturer Capturer, StreamOptions Options)
         {
             Connection = Xnet;
             Closing = (m_Disposing = new()).Token;
 
             m_Open = Open;
+
+            m_Capturer = Capturer;
             m_Extender = StreamExtender.Get(Connection);
 
             m_Closing = Xnet.Closing.Register(Dispose, false);
@@ -254,7 +255,7 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="StreamException"></exception>
-        public async ValueTask<byte[]> ReadAsync(ushort Size, CancellationToken Token = default)
+        public async ValueTask<byte[]> ReadAsync(int Size, CancellationToken Token = default)
         {
             var Read = new PKT_READ
             {
@@ -273,6 +274,7 @@ namespace XnetStreams
                     if (CanSeek == true)
                         m_Cursor += Result.Data.Length;
 
+                    m_Capturer?.PushRx(Connection, Result.Data.Length / 1024.0);
                     return Result.Data;
                 }
 
@@ -286,7 +288,7 @@ namespace XnetStreams
             var Read = 0;
             while (Count > 0)
             {
-                var Slice = (ushort)Math.Min(Count, ushort.MaxValue / 2);
+                var Slice = Math.Min(Count, ushort.MaxValue * 1024);
                 if (Slice <= 0)
                     break;
 
@@ -310,7 +312,7 @@ namespace XnetStreams
 
             while (Buffer.Length > 0)
             {
-                var Slice = (ushort)Math.Min(Buffer.Length - Read, ushort.MaxValue / 2);
+                var Slice = Math.Min(Buffer.Length - Read, ushort.MaxValue * 1024);
                 if (Slice <= 0)
                     break;
 
@@ -318,8 +320,8 @@ namespace XnetStreams
                 if (Data is null || Data.Length <= 0)
                     break;
 
-                Data.CopyTo(Buffer.Slice(0, Slice));
-                Buffer = Buffer.Slice(Slice);
+                Data.CopyTo(Buffer.Slice(0, Data.Length));
+                Buffer = Buffer.Slice(Data.Length);
                 Read += Data.Length;
             }
 
@@ -337,7 +339,7 @@ namespace XnetStreams
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
         /// <exception cref="StreamException"></exception>
-        public byte[] Read(ushort Size, CancellationToken Token = default)
+        public byte[] Read(int Size, CancellationToken Token = default)
         {
             return ReadAsync(Size, Token)
                 .ConfigureAwait(false)
@@ -358,7 +360,7 @@ namespace XnetStreams
 
             while (Buffer.Length > 0)
             {
-                var Slice = (ushort)Math.Min(Buffer.Length - Read, ushort.MaxValue / 2);
+                var Slice = Math.Min(Buffer.Length - Read, ushort.MaxValue * 1024);
                 if (Slice <= 0)
                     break;
 
@@ -366,8 +368,8 @@ namespace XnetStreams
                 if (Data is null || Data.Length <= 0)
                     break;
 
-                Data.CopyTo(Buffer.Slice(0, Slice));
-                Buffer = Buffer.Slice(Slice);
+                Data.CopyTo(Buffer.Slice(0, Data.Length));
+                Buffer = Buffer.Slice(Data.Length);
                 Read += Data.Length;
             }
 
@@ -387,8 +389,8 @@ namespace XnetStreams
         /// <exception cref="StreamException"></exception>
         public async ValueTask<int> WriteOnceAsync(byte[] Data, CancellationToken Token = default)
         {
-            if (Data.Length >= ushort.MaxValue / 2)
-                Array.Resize(ref Data, ushort.MaxValue / 2);
+            if (Data.Length >= ushort.MaxValue * 1024)
+                Array.Resize(ref Data, ushort.MaxValue * 1024);
 
             var Write = new PKT_WRITE
             {
@@ -407,6 +409,7 @@ namespace XnetStreams
                     if (CanSeek == true)
                         m_Cursor += Result.Size;
 
+                    m_Capturer?.PushTx(Connection, Result.Size / 1024.0);
                     return Result.Size;
                 }
 

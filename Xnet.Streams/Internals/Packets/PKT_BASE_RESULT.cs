@@ -18,7 +18,11 @@
         protected override void Decode(BinaryReader Reader)
         {
             base.Decode(Reader);
-            Status = (StreamStatus)Reader.ReadByte();
+            try { Status = (StreamStatus)Reader.ReadByte(); }
+            catch
+            {
+                Status = StreamStatus.InvalidOperation;
+            }
         }
 
         /// <inheritdoc/>

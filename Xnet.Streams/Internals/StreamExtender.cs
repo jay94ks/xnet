@@ -10,6 +10,7 @@ namespace XnetStreams.Internals
     {
         private readonly PacketDispatcher m_Dispatcher = new();
         private readonly StreamRegistry m_Registry = new();
+        
         private StreamDelegate m_Delegate;
 
         /// <summary>
@@ -136,7 +137,7 @@ namespace XnetStreams.Internals
         /// <exception cref="InvalidOperationException">the remote connection is closed before completion.</exception>
         /// <exception cref="InvalidDataException">the dispatched result is not correct.</exception>
         /// <exception cref="OperationCanceledException">the token is triggered.</exception>
-        public async Task<StreamMetadata> QueryAsync(Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
+        public async Task<StreamMetadata?> QueryAsync(Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
         {
             using var Reservation = m_Dispatcher.Reserve();
             var Open = new PKT_QUERY
@@ -168,7 +169,7 @@ namespace XnetStreams.Internals
                     Handled = true;
 
                     if (Result.Status == StreamStatus.Ok)
-                        return Result.Metadata.Value;
+                        return Result.Metadata;
 
                     if (Result.Status == StreamStatus.NotImplemented)
                         throw new NotSupportedException("the remote stream does not implement metadata provider.");
@@ -203,6 +204,7 @@ namespace XnetStreams.Internals
         public async Task<RemoteStream> OpenAsync(Xnet Xnet, StreamOptions Options, CancellationToken Token = default)
         {
             using var Reservation = m_Dispatcher.Reserve();
+            var Capturer = Xnet.GetExtender<IStreamStatisticsCapturer>();
             var Open = new PKT_OPEN
             {
                 TraceId = Reservation.TraceId,
@@ -237,7 +239,7 @@ namespace XnetStreams.Internals
                     Handled = true;
                     if (Result.Status == StreamStatus.Ok)
                     {
-                        return new RemoteStream(Xnet, Result, Options);
+                        return new RemoteStream(Xnet, Result, Capturer, Options);
                     }
 
                     throw new StreamException(Result.Status);
@@ -676,6 +678,7 @@ namespace XnetStreams.Internals
         /// <returns></returns>
         internal async Task ReadAsync(Xnet Xnet, PKT_READ Read)
         {
+            var Capturer = Xnet.GetExtender<IStreamStatisticsCapturer>();
             var Result = new PKT_READ_RESULT
             {
                 Id = Read.Id,
@@ -699,8 +702,8 @@ namespace XnetStreams.Internals
                     return;
                 }
 
-                if (Read.Size > ushort.MaxValue / 2)
-                    Read.Size = ushort.MaxValue / 2;
+                if (Read.Size > ushort.MaxValue * 1024)
+                    Read.Size = ushort.MaxValue * 1024;
 
                 if (Reg.Stream.CanRead == false)
                 {
@@ -708,9 +711,8 @@ namespace XnetStreams.Internals
                     return;
                 }
 
-
                 var Retval = new byte[Read.Size];
-                var Buffer = ArrayPool<byte>.Shared.Rent(8192);
+                var Buffer = ArrayPool<byte>.Shared.Rent(ushort.MaxValue);
                 var Offset = 0;
 
                 try
@@ -799,6 +801,9 @@ namespace XnetStreams.Internals
             {
                 if (Result != null && Result.TraceId != Guid.Empty)
                     await Xnet.EmitAsync(Result);
+
+                if (Result != null & Result.Data != null)
+                    Capturer?.PushTx(Xnet, Result.Data.Length / 1024.0);
             }
         }
 
@@ -1003,6 +1008,7 @@ namespace XnetStreams.Internals
         /// <returns></returns>
         internal async Task WriteAsync(Xnet Xnet, PKT_WRITE Write)
         {
+            var Capturer = Xnet.GetExtender<IStreamStatisticsCapturer>();
             var Result = new PKT_WRITE_RESULT
             {
                 Id = Write.Id,
@@ -1078,6 +1084,10 @@ namespace XnetStreams.Internals
             {
                 if (Result != null && Result.TraceId != Guid.Empty)
                     await Xnet.EmitAsync(Result);
+
+
+                if (Result != null)
+                    Capturer?.PushRx(Xnet, Result.Size / 1024.0);
             }
         }
 

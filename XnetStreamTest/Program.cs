@@ -80,11 +80,11 @@ namespace XnetStreamTest
             {
                 var Meta = await Xnet.QueryAsync(Name);
 
-                Console.WriteLine($"Is Directory: {Meta.IsDirectory}.");
-                Console.WriteLine($"Creation Time: {Meta.CreationTime}.");
-                Console.WriteLine($"Last Access Time: {Meta.LastAccessTime}.");
-                Console.WriteLine($"Last Write Time: {Meta.LastWriteTime}.");
-                Console.WriteLine($"Total Size: {Meta.TotalSize}.");
+                Console.WriteLine($"Is Directory: {Meta.Value.IsDirectory}.");
+                Console.WriteLine($"Creation Time: {Meta.Value.CreationTime}.");
+                Console.WriteLine($"Last Access Time: {Meta.Value.LastAccessTime}.");
+                Console.WriteLine($"Last Write Time: {Meta.Value.LastWriteTime}.");
+                Console.WriteLine($"Total Size: {Meta.Value.TotalSize}.");
 
                 await using var Stream = await Xnet.OpenAsync(Name, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 

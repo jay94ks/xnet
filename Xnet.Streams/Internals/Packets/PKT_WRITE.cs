@@ -19,8 +19,10 @@
         {
             base.Decode(Reader);
 
-            ushort Size = Reader.ReadByte();
-            Size |= (ushort)(Reader.ReadByte() << 8);
+            int Size = Reader.ReadByte();
+            Size |= (int)(Reader.ReadByte() << 8);
+            Size |= (int)(Reader.ReadByte() << 16);
+            Size |= (int)(Reader.ReadByte() << 24);
 
             if (Size <= 0)
                 Data = Array.Empty<byte>();
@@ -38,11 +40,15 @@
             {
                 Writer.Write(byte.MinValue);
                 Writer.Write(byte.MinValue);
+                Writer.Write(byte.MinValue);
+                Writer.Write(byte.MinValue);
                 return;
             }
 
             Writer.Write((byte)(Data.Length & 0xff));
             Writer.Write((byte)(Data.Length >> 8));
+            Writer.Write((byte)(Data.Length >> 16));
+            Writer.Write((byte)(Data.Length >> 24));
             Writer.Write(Data);
         }
     }

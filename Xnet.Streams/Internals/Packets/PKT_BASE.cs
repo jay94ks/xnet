@@ -18,8 +18,15 @@
         /// <inheritdoc/>
         protected override void Decode(BinaryReader Reader)
         {
-            Id = new Guid(Reader.ReadBytes(16));
-            TraceId = new Guid(Reader.ReadBytes(16));
+            try
+            {
+                Id = new Guid(Reader.ReadBytes(16));
+                TraceId = new Guid(Reader.ReadBytes(16));
+            }
+            catch
+            {
+
+            }
         }
 
         /// <inheritdoc/>
