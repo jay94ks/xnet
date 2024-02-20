@@ -52,6 +52,8 @@ public sealed partial class Xnet : IDisposable
         RemoteEndpoint = Socket.RemoteEndPoint as IPEndPoint;
 
         Connections = GetExtender<Collection>();
+        Statistics = Services.GetService<StatisticsCounter>()
+            ?? new DefaultStatisticsCounter(); // --> in this case, the counter will be for single connection.
     }
 
     /// <summary>
@@ -78,6 +80,11 @@ public sealed partial class Xnet : IDisposable
     /// Connections.
     /// </summary>
     public Collection Connections { get; }
+
+    /// <summary>
+    /// Statistics counter.
+    /// </summary>
+    public StatisticsCounter Statistics { get; }
 
     /// <summary>
     /// Indicates whether the underlying connection is alive or not.
@@ -157,6 +164,9 @@ public sealed partial class Xnet : IDisposable
                 if (Lenb.Length <= 0)
                     break;
 
+                // --> accumulate `Lenb` to counter.
+                Statistics.Accumulate(Lenb.Length, null);
+
                 var Len = Lenb[0] | (Lenb[1] << 8) | (Lenb[2] << 16) | (Lenb[3] << 24);
                 if (Len <= 0)
                     continue;
@@ -164,6 +174,9 @@ public sealed partial class Xnet : IDisposable
                 var Data = await m_Socket.ReceiveAsync(Len);
                 if (Data.Length < 16)
                     break;
+
+                // --> accumulate `Data` to counter.
+                Statistics.Accumulate(Data.Length, null);
 
                 var Packet = DecodeFrameToPacket(Data);
                 if (Packet is null)
@@ -202,12 +215,15 @@ public sealed partial class Xnet : IDisposable
         if (IsServerMode)
         {
             var Temp = await m_Socket.ReceiveAsync(16);
+            Statistics.Accumulate(null, Temp.Length);
+
             if (Temp.Length != 16 || new Guid(Temp) != NetworkId)
                 return false;
 
             return true;
         }
 
+        Statistics.Accumulate(null, 16);
         return await m_Socket.SendAsync(NetworkId.ToByteArray());
     }
 
@@ -226,6 +242,7 @@ public sealed partial class Xnet : IDisposable
             if (Frame is null)
                 return false;
 
+            Statistics.Accumulate(null, Frame.Length);
             return await m_Socket.SendAsync(Frame, Token);
         }
 
